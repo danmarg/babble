@@ -56,7 +56,6 @@ func (c *Chain) WriteChain(writer io.Writer) error {
 // ReadCorpus reads text from reader and creates a new Chain from it.
 func ReadCorpus(reader io.Reader) (*Chain, error) {
 	c := new(Chain)
-	c.Links = make(map[Prefix]map[Token]int)
 	err := c.AddCorpus(reader)
 	return c, err
 }
@@ -71,6 +70,9 @@ func startPrefix() Prefix {
 
 // AddCorpus adds words from the reader to the Chain.
 func (c *Chain) AddCorpus(reader io.Reader) error {
+	if c.Links == nil {
+		c.Links = make(map[Prefix]map[Token]int)
+	}
 	// Read tokens from reader.
 	scnr := bufio.NewScanner(reader)
 	scnr.Split(bufio.ScanWords)

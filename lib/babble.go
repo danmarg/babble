@@ -3,8 +3,8 @@ package babble
 import (
 	"bufio"
 	"encoding/gob"
-	"github.com/cenkalti/log"
 	"io"
+	"log"
 	"math/rand"
 )
 
@@ -105,7 +105,7 @@ func (c *Chain) Babble() string {
 	for {
 		sfxs, ok := c.Links[pfx]
 		if !ok {
-			log.Debugf("Bailing on prefix %v", pfx)
+			log.Printf("Bailing on prefix %v", pfx)
 			break
 		}
 		cnt := 0

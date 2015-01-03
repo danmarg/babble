@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
-	"github.com/cenkalti/log"
 	babble "github.com/danmarg/babble/lib"
+	"log"
 	"os"
+	"strings"
 )
 
 var (
@@ -16,7 +18,6 @@ var (
 func init() {
 	flag.StringVar(&corpus, "add_corpus", "", "Add words from this corpus.")
 	flag.StringVar(&chain, "chain_file", "", "File to load/save chain from.")
-	flag.IntVar(&verbosity, "v", 2, "Verbosity.")
 }
 
 func main() {
@@ -25,7 +26,6 @@ func main() {
 	if chain == "" {
 		log.Fatalln("missing required --chain")
 	}
-	log.SetLevel([]log.Level{log.DEBUG, log.INFO, log.NOTICE, log.WARNING, log.ERROR, log.CRITICAL}[verbosity])
 	// If chain file exists, try to load from it.
 	var c babble.Chain
 	loaded := false
@@ -47,17 +47,21 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		if loaded {
-			err = c.AddCorpus(f)
-			if err != nil {
-				log.Fatalln(err)
+		scnr := bufio.NewScanner(f)
+		for scnr.Scan() {
+			i := strings.NewReader(scnr.Text())
+			if loaded {
+				err = c.AddCorpus(i)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			} else {
+				cn, err := babble.ReadCorpus(i)
+				if err != nil {
+					log.Fatalln(err)
+				}
+				c = *cn
 			}
-		} else {
-			cn, err := babble.ReadCorpus(f)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			c = *cn
 		}
 		// Save chain.
 		f, err = os.Create(chain)
@@ -71,5 +75,5 @@ func main() {
 		}
 	}
 
-	log.Noticef("XXX: %v", c.Babble())
+	log.Printf("%v", c.Babble())
 }

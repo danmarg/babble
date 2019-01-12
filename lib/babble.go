@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"regexp"
 )
 
 const prefixLen int = 2
@@ -27,7 +28,8 @@ type Prefix [prefixLen]Token
 
 // A Chain represents the mapping of prefix to Suffix or EndString Tokens.
 type Chain struct {
-	Links map[Prefix]map[Token]int
+	Ignore regexp.Regexp
+	Links  map[Prefix]map[Token]int
 }
 
 func init() {
@@ -79,6 +81,9 @@ func (c *Chain) AddCorpus(reader io.Reader) error {
 	prev := startPrefix()
 	for scnr.Scan() {
 		cur := scnr.Text()
+		if c.Ignore != nil && c.Ignore.Match(cur) {
+			continue
+		}
 		var sfx Word = Word(cur)
 		v, ok := c.Links[prev]
 		if !ok {
